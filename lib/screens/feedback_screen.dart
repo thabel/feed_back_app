@@ -56,6 +56,11 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     }
   }
 
+  void _refreshQuestionnaire() {
+    _resetTimer?.cancel();
+    _loadQuestionnaire();
+  }
+
   void _nextQuestion() {
     if (_currentQuestionnaire == null) return;
 
@@ -122,9 +127,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           _showEndMessage = true;
         });
 
-        // Reset after 5 minutes
+        // Reset after 20 seconds
         _resetTimer?.cancel();
-        _resetTimer = Timer(const Duration(minutes: 5), () {
+        _resetTimer = Timer(const Duration(seconds: 20), () {
           if (mounted) {
             _loadQuestionnaire();
           }
@@ -155,6 +160,17 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         backgroundColor: Colors.blue,
         elevation: 0,
         actions: [
+          // Refresh button
+          Padding(
+            padding: EdgeInsets.all(isTablet ? 20.0 : 16.0),
+            child: GestureDetector(
+              onTap: _refreshQuestionnaire,
+              child: Icon(
+                Icons.refresh,
+                size: isTablet ? 28 : 24,
+              ),
+            ),
+          ),
           // Settings button
           Padding(
             padding: EdgeInsets.all(isTablet ? 20.0 : 16.0),
@@ -253,16 +269,21 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               SizedBox(height: isTablet ? 48 : 32),
               // Question widget
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isTablet ? 48.0 : 24.0,
-                  ),
-                  child: QuestionWidget(
-                    question: question,
-                    initialValue: _answers[question.id],
-                    onAnswered: (value) {
-                      setState(() => _answers[question.id] = value);
-                    },
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 48.0 : 24.0,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 800),
+                      child: QuestionWidget(
+                        question: question,
+                        initialValue: _answers[question.id],
+                        onAnswered: (value) {
+                          setState(() => _answers[question.id] = value);
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -391,7 +412,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 SizedBox(height: isTablet ? 64 : 48),
                 // Countdown text
                 Text(
-                  'La première question réapparaîtra dans 5 minutes...',
+                  'La première question réapparaîtra dans 20 secondes...',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: isTablet ? 18 : 16,

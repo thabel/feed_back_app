@@ -28,38 +28,48 @@ class _QuestionWidgetState extends State<QuestionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Question text with mandatory indicator
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.question.text,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF333333),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 40.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.question.text,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF333333),
+                    ),
                   ),
                 ),
-              ),
-              if (widget.question.isMandatory)
-                const Text(
-                  '*',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                if (widget.question.isMandatory)
+                  const Text(
+                    '*',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 32),
           // Question-specific widgets
-          _buildQuestionWidget(),
+          Center(
+            child: _buildQuestionWidget(),
+          ),
         ],
       ),
     );
@@ -159,7 +169,7 @@ class _StarRatingWidgetState extends State<StarRatingWidget> {
   @override
   void initState() {
     super.initState();
-    _rating = widget.initialValue;
+    _rating = widget.initialValue > 0 ? widget.initialValue : 0;
   }
 
   @override
@@ -241,7 +251,7 @@ class _ScoreWidgetState extends State<ScoreWidget> {
   @override
   void initState() {
     super.initState();
-    _score = widget.initialValue;
+    _score = widget.initialValue > 0 ? widget.initialValue : 0;
   }
 
   @override
@@ -539,7 +549,7 @@ class _SingleChoiceWidgetState extends State<SingleChoiceWidget> {
   @override
   void initState() {
     super.initState();
-    _selectedChoice = widget.initialValue;
+    _selectedChoice = widget.initialValue.isEmpty ? '' : widget.initialValue;
   }
 
   @override
