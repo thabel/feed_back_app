@@ -65,6 +65,7 @@ class FeedbackService {
           text: 'Courtoisie du personnel',
           type: QuestionType.score,
           isMandatory: true,
+          defaultValue: 10,
         ),
         Question(
           id: 'q2_3',

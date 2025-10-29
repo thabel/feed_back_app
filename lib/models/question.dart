@@ -17,6 +17,7 @@ class Question {
   final bool isMandatory;
   final List<String>? choices; // For single choice questions
   final String? placeholder;
+  final dynamic defaultValue; // Default value for the question
 
   Question({
     required this.id,
@@ -25,6 +26,7 @@ class Question {
     this.isMandatory = true,
     this.choices,
     this.placeholder,
+    this.defaultValue,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class Question {
       isMandatory: json['isMandatory'] as bool? ?? true,
       choices: List<String>.from(json['choices'] as List<dynamic>? ?? []),
       placeholder: json['placeholder'] as String?,
+      defaultValue: json['defaultValue'],
     );
   }
 
@@ -46,6 +49,7 @@ class Question {
       'isMandatory': isMandatory,
       'choices': choices,
       'placeholder': placeholder,
+      'defaultValue': defaultValue,
     };
   }
 

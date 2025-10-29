@@ -161,35 +161,31 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         elevation: 0,
         actions: [
           // Refresh button
-          Padding(
-            padding: EdgeInsets.all(isTablet ? 20.0 : 16.0),
-            child: GestureDetector(
-              onTap: _refreshQuestionnaire,
-              child: Icon(
-                Icons.refresh,
-                size: isTablet ? 28 : 24,
-              ),
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+              size: isTablet ? 28 : 24,
             ),
+            onPressed: _refreshQuestionnaire,
+            splashRadius: isTablet ? 28 : 24,
           ),
           // Settings button
-          Padding(
-            padding: EdgeInsets.all(isTablet ? 20.0 : 16.0),
-            child: GestureDetector(
-              onTap: () async {
-                final result = await Navigator.of(context).push<bool>(
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsScreen(),
-                  ),
-                );
-                if (result == true) {
-                  _loadQuestionnaire();
-                }
-              },
-              child: Icon(
-                Icons.settings,
-                size: isTablet ? 28 : 24,
-              ),
+          IconButton(
+            icon: Icon(
+              Icons.settings,
+              size: isTablet ? 28 : 24,
             ),
+            onPressed: () async {
+              final result = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+              if (result == true) {
+                _loadQuestionnaire();
+              }
+            },
+            splashRadius: isTablet ? 28 : 24,
           ),
         ],
       ),

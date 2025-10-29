@@ -23,7 +23,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
   @override
   void initState() {
     super.initState();
-    _currentValue = widget.initialValue;
+    _currentValue = widget.initialValue ?? widget.question.defaultValue;
   }
 
   @override
@@ -31,46 +31,47 @@ class _QuestionWidgetState extends State<QuestionWidget> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Question text with mandatory indicator
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 40.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Text(
-                    widget.question.text,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF333333),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Question text with mandatory indicator
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 40.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.question.text,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF333333),
+                      ),
                     ),
                   ),
-                ),
-                if (widget.question.isMandatory)
-                  const Text(
-                    '*',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  if (widget.question.isMandatory)
+                    const Text(
+                      '*',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 32),
-          // Question-specific widgets
-          Center(
-            child: _buildQuestionWidget(),
-          ),
-        ],
+            const SizedBox(height: 32),
+            // Question-specific widgets
+            _buildQuestionWidget(),
+          ],
+        ),
       ),
     );
   }
@@ -252,6 +253,10 @@ class _ScoreWidgetState extends State<ScoreWidget> {
   void initState() {
     super.initState();
     _score = widget.initialValue > 0 ? widget.initialValue : 0;
+    // If we have an initial value, immediately notify parent
+    if (_score > 0) {
+      widget.onChanged(_score);
+    }
   }
 
   @override
