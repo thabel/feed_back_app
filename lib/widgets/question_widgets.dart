@@ -253,9 +253,13 @@ class _ScoreWidgetState extends State<ScoreWidget> {
   void initState() {
     super.initState();
     _score = widget.initialValue > 0 ? widget.initialValue : 0;
-    // If we have an initial value, immediately notify parent
-    if (_score > 0) {
-      widget.onChanged(_score);
+  }
+
+  @override
+  void didUpdateWidget(ScoreWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue && widget.initialValue > 0) {
+      _score = widget.initialValue;
     }
   }
 
