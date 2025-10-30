@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../models/question.dart';
 import '../services/feedback_service.dart';
 import '../widgets/question_widgets.dart';
+import '../utils/validators.dart';
 import 'settings_screen.dart';
 import 'dart:async';
 
@@ -64,33 +65,28 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   void _nextQuestion() {
     if (_currentQuestionnaire == null) return;
 
-    // Check if current question is mandatory and has no answer
     final currentQuestion = _currentQuestionnaire!.questions[_currentQuestionIndex];
     final answer = _answers[currentQuestion.id];
 
-    if (currentQuestion.isMandatory) {
-      if (answer == null || answer == '' || answer == 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cette question est obligatoire'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
+    // Validation
+    String? validationError = _validateQuestion(currentQuestion, answer);
 
-      // Validate email if it's an email question
-      if (currentQuestion.type == QuestionType.email && answer is String) {
-        if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(answer)) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Veuillez entrer un email valide'),
-              backgroundColor: Colors.red,
+    if (validationError != null) {
+      // Show error as modal dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Validation'),
+          content: Text(validationError),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
             ),
-          );
-          return;
-        }
-      }
+          ],
+        ),
+      );
+      return;
     }
 
     if (_currentQuestionIndex < _currentQuestionnaire!.questions.length - 1) {
@@ -98,6 +94,31 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     } else {
       _submitFeedback();
     }
+  }
+
+  String? _validateQuestion(Question question, dynamic answer) {
+    // Check if mandatory field is empty
+    if (question.isMandatory) {
+      if (answer == null || answer == '' || answer == 0) {
+        return 'Cette question est obligatoire';
+      }
+
+      // Validate email
+      if (question.type == QuestionType.email && answer is String) {
+        if (!Validators.isValidEmail(answer)) {
+          return 'Veuillez entrer un email valide';
+        }
+      }
+
+      // Validate phone
+      if (question.type == QuestionType.phone && answer is String) {
+        if (!Validators.isValidPhone(answer)) {
+          return 'Veuillez entrer un numéro de téléphone valide (minimum 8 chiffres)';
+        }
+      }
+    }
+
+    return null;
   }
 
   Future<void> _submitFeedback() async {
@@ -365,57 +386,66 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
   Widget _buildEndMessageScreen() {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final isTablet = screenWidth >= 600;
     final endMessage = _feedbackService.getEndMessage(_currentQuestionnaire!.id);
 
-    return SafeArea(
+    return Center(
       child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: isTablet ? 48.0 : 24.0),
-          child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: screenHeight - MediaQuery.of(context).padding.top - kToolbarHeight,
+          ),
+          child: IntrinsicHeight(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: isTablet ? 80 : 40),
-                // Success icon with smiley
-                Container(
-                  width: isTablet ? 160 : 120,
-                  height: isTablet ? 160 : 120,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.green,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '😄',
-                      style: TextStyle(
-                        fontSize: isTablet ? 80 : 60,
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isTablet ? 48.0 : 24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Success icon with smiley
+                      Container(
+                        width: isTablet ? 160 : 120,
+                        height: isTablet ? 160 : 120,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.green,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '😄',
+                            style: TextStyle(
+                              fontSize: isTablet ? 80 : 60,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      SizedBox(height: isTablet ? 48 : 32),
+                      // End message
+                      Text(
+                        endMessage,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: isTablet ? 32 : 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: isTablet ? 64 : 48),
+                      // Countdown text
+                      Text(
+                        'La première question réapparaîtra dans 20 secondes...',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: isTablet ? 18 : 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: isTablet ? 48 : 32),
-                // End message
-                Text(
-                  endMessage,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: isTablet ? 32 : 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: isTablet ? 64 : 48),
-                // Countdown text
-                Text(
-                  'La première question réapparaîtra dans 20 secondes...',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: isTablet ? 18 : 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                SizedBox(height: isTablet ? 80 : 40),
               ],
             ),
           ),

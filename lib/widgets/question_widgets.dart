@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/question.dart';
+import '../utils/validators.dart';
 
 class QuestionWidget extends StatefulWidget {
   final Question question;
@@ -375,7 +376,17 @@ class _EmailWidgetState extends State<EmailWidget> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.initialValue);
+    // Don't pre-fill with previous values - always start empty or with default
+    _controller = TextEditingController(text: widget.initialValue.isEmpty ? '' : widget.initialValue);
+  }
+
+  @override
+  void didUpdateWidget(EmailWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset to empty if initialValue is empty (new question)
+    if (widget.initialValue.isEmpty && oldWidget.initialValue.isNotEmpty) {
+      _controller.text = '';
+    }
   }
 
   @override
@@ -384,12 +395,10 @@ class _EmailWidgetState extends State<EmailWidget> {
     super.dispose();
   }
 
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isInvalid = _controller.text.isNotEmpty && !Validators.isValidEmail(_controller.text);
+
     return Column(
       children: [
         TextField(
@@ -399,23 +408,31 @@ class _EmailWidgetState extends State<EmailWidget> {
             hintText: 'exemple@email.com',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.grey),
+              borderSide: BorderSide(color: isInvalid ? Colors.red : Colors.grey),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.blue, width: 2),
+              borderSide: BorderSide(
+                color: isInvalid ? Colors.red : Colors.blue,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
             ),
             contentPadding: const EdgeInsets.all(16),
           ),
           onChanged: (value) {
+            setState(() {});
             widget.onChanged(value);
           },
         ),
-        if (_controller.text.isNotEmpty && !_isValidEmail(_controller.text))
+        if (isInvalid)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: Text(
-              'Email invalide',
+              'Email invalide (format: exemple@domaine.com)',
               style: TextStyle(color: Colors.red[700], fontSize: 14),
             ),
           ),
@@ -446,7 +463,17 @@ class _PhoneWidgetState extends State<PhoneWidget> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.initialValue);
+    // Don't pre-fill with previous values - always start empty or with default
+    _controller = TextEditingController(text: widget.initialValue.isEmpty ? '' : widget.initialValue);
+  }
+
+  @override
+  void didUpdateWidget(PhoneWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset to empty if initialValue is empty (new question)
+    if (widget.initialValue.isEmpty && oldWidget.initialValue.isNotEmpty) {
+      _controller.text = '';
+    }
   }
 
   @override
@@ -455,26 +482,52 @@ class _PhoneWidgetState extends State<PhoneWidget> {
     super.dispose();
   }
 
+  bool _isValidPhone(String phone) {
+    return Validators.isValidPhone(phone);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      keyboardType: TextInputType.phone,
-      decoration: InputDecoration(
-        hintText: '+33 6 12 34 56 78',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.grey),
+    final isInvalid = _controller.text.isNotEmpty && !_isValidPhone(_controller.text);
+
+    return Column(
+      children: [
+        TextField(
+          controller: _controller,
+          keyboardType: TextInputType.phone,
+          decoration: InputDecoration(
+            hintText: '+33 6 12 34 56 78',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: isInvalid ? Colors.red : Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: isInvalid ? Colors.red : Colors.blue,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.all(16),
+          ),
+          onChanged: (value) {
+            setState(() {});
+            widget.onChanged(value);
+          },
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.blue, width: 2),
-        ),
-        contentPadding: const EdgeInsets.all(16),
-      ),
-      onChanged: (value) {
-        widget.onChanged(value);
-      },
+        if (isInvalid)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              'Numéro invalide (minimum 8 chiffres)',
+              style: TextStyle(color: Colors.red[700], fontSize: 14),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -503,7 +556,17 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.initialValue);
+    // Don't pre-fill with previous values - always start empty or with default
+    _controller = TextEditingController(text: widget.initialValue.isEmpty ? '' : widget.initialValue);
+  }
+
+  @override
+  void didUpdateWidget(TextInputWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset to empty if initialValue is empty (new question)
+    if (widget.initialValue.isEmpty && oldWidget.initialValue.isNotEmpty) {
+      _controller.text = '';
+    }
   }
 
   @override
